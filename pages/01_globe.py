@@ -1,20 +1,27 @@
 import solara
-import leafmap.maplibregl as leafmap
+from anymap import MapLibreMap
 
 
-def create_map():
+class Map(MapLibreMap):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        super().add_basemap("CartoDB.DarkMatter")
 
-    m = leafmap.Map(
-        style="liberty",
-        projection="globe",
-        height="750px",
-        zoom=2.5,
-        sidebar_visible=True,
-    )
-    return m
+        # 加入 GitHub 上的 GeoJSON 檔案
+        routes_url = "https://raw.githubusercontent.com/chenhao0506/1105Solara-webmap-app/main/routes.geojson"
+        stations_url = "https://raw.githubusercontent.com/chenhao0506/1105Solara-webmap-app/main/stations.geojson"
+
+        # 加入圖層
+        super().add_geojson(routes_url, name="Routes")
+        super().add_geojson(stations_url, name="Stations")
+
+        super().add_layer_control(collapsed=False)
 
 
 @solara.component
 def Page():
-    m = create_map()
-    return m.to_solara()
+    with solara.Card():
+        Map().element()
+
+
+Page()
