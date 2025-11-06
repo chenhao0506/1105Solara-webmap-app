@@ -2,8 +2,14 @@ import solara
 from anymap import MapLibreMap
 
 
-def create_map(show_routes=True, show_stations=True):
-    m = MapLibreMap()
+def create_map():
+    # 建立地圖並設定中心點與縮放
+    m = MapLibreMap(
+        center=[121.55555, 25.08722],  # 經度、緯度（台北市某處）
+        zoom=16                        # 縮放層級
+    )
+
+    # 加入底圖
     m.add_basemap("CartoDB.DarkMatter")
 
     # GeoJSON 資料來源
@@ -14,47 +20,38 @@ def create_map(show_routes=True, show_stations=True):
     m.add_source("routes", {"type": "geojson", "data": routes_url})
     m.add_source("stations", {"type": "geojson", "data": stations_url})
 
-    # 根據狀態加入對應圖層
-    if show_routes:
-        m.add_layer(
-            {
-                "id": "routes-layer",
-                "type": "line",
-                "source": "routes",
-                "paint": {
-                    "line-color": "#00FFFF",
-                    "line-width": 3,
-                },
-            }
-        )
+    # 加入路線圖層
+    m.add_layer(
+        {
+            "id": "routes-layer",
+            "type": "line",
+            "source": "routes",
+            "paint": {
+                "line-color": "#00FFFF",
+                "line-width": 3
+            },
+        }
+    )
 
-    if show_stations:
-        m.add_layer(
-            {
-                "id": "stations-layer",
-                "type": "circle",
-                "source": "stations",
-                "paint": {
-                    "circle-radius": 6,
-                    "circle-color": "#FF9900",
-                    "circle-stroke-width": 1,
-                    "circle-stroke-color": "#FFFFFF",
-                },
-            }
-        )
+    # 加入站點圖層
+    m.add_layer(
+        {
+            "id": "stations-layer",
+            "type": "circle",
+            "source": "stations",
+            "paint": {
+                "circle-radius": 6,
+                "circle-color": "#FF9900",
+                "circle-stroke-width": 1,
+                "circle-stroke-color": "#FFFFFF"
+            },
+        }
+    )
 
     return m
 
 
 @solara.component
 def Page():
-    show_routes, set_show_routes = solara.use_state(True)
-    show_stations, set_show_stations = solara.use_state(True)
-
-    with solara.Card("地圖圖層控制"):
-        solara.Checkbox(label="顯示 Routes", value=show_routes, on_value=set_show_routes)
-        solara.Checkbox(label="顯示 Stations", value=show_stations, on_value=set_show_stations)
-
-    # 地圖元件
-    with solara.Card():
-        create_map(show_routes, show_stations).element()
+    with solara.Card("地圖展示"):
+        create_map().element()
